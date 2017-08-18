@@ -37,6 +37,11 @@ class ModelFactory
             return new MetadataCollection($data);
         }
 
+        //Links Collection
+        if (isset($data['links'])) {
+            return new LinksCollection($data);
+        }
+
         //Search Results
         if (isset($data['matches'])) {
             return new SearchResults($data);

@@ -1266,4 +1266,53 @@ class Dropbox
         //Return the decoded body
         return $body;
     }
+
+	/**
+	 * @param $path
+	 * @return Models\ModelInterface
+	 * @throws DropboxClientException
+	 */
+    public function listSharedLinks($path)
+	{
+		//Path cannot be null
+		if (is_null($path)) {
+			throw new DropboxClientException("Path cannot be null.");
+		}
+
+		//Set the path
+		$params['path'] = $path;
+
+		//Get File Metadata
+		$response = $this->postToAPI('/sharing/list_shared_links', $params);
+
+		//Make and Return the Model
+		return $this->makeModelFromResponse($response);
+	}
+
+	/**
+	 * Get a shared link to stream contents of a file
+	 *
+	 * @param  string $path Path to the file you want a shared link to
+	 *
+	 * https://www.dropbox.com/developers/documentation/http/documentation#sharing-create_shared_link_with_settings
+	 *
+	 * @throws \Kunnu\Dropbox\Exceptions\DropboxClientException
+	 * @return \Kunnu\Dropbox\Models\FileLinkMetadata
+	 */
+	public function createShareableLink($path)
+	{
+		//Path cannot be null
+		if (is_null($path)) {
+			throw new DropboxClientException("Path cannot be null.");
+		}
+		//Check if links exists, because only 1 per file is allowed.
+		$links = $this->listSharedLinks($path);
+		if($links->getItems()->isNotEmpty()){
+			return $links->getItems()[0];
+		}
+		//Get Shared Link
+		$response = $this->postToAPI('/sharing/create_shared_link_with_settings', ['path' => $path]);
+		//Make and Return the Model
+		return $this->makeModelFromResponse($response);
+	}
 }
